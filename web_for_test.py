@@ -2,7 +2,10 @@ import pytesseract
 from PIL import Image
 import matplotlib.pyplot as plt
 import cv2
+from datetime import datetime
 import os
+import re
+import zipfile
 import pandas as pd
 import streamlit as st
 import numpy as np
@@ -14,36 +17,10 @@ st.set_page_config(
 
 st.title('Certicatate Scraper')
 
-folder_path = st.folder_uploader("Choose a folder containing JPEG images")
-
-# List to store images
-img = []
-
-if folder_path:
-    # List all files in the selected folder
-    files = os.listdir(folder_path)
-    
-    for file in files:
-        try:
-            # Check if the file is a JPEG image
-            if file.lower().endswith(('.jpg', '.jpeg')):
-                # Read the image using OpenCV
-                img0 = cv2.imread(os.path.join(folder_path, file), cv2.IMREAD_GRAYSCALE)
-                img.append(img0)
-        except Exception as e:
-            st.write(f"Error reading file {file}: {e}")
-
-
 # Initialize the Tesseract OCR
 def initialize_tesseract():
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-# Define cropping coordinates for different regions
-coordinates = [
-    (166, 258, 64, 310),
-    (166, 270, 548, 911),
-    (458, 616, 70, 420)  # Adjusted right boundary for crop2
-]
 
 # Initialize Tesseract
 initialize_tesseract()
@@ -69,21 +46,18 @@ def process_cropped_images1(img, coordinates):
     for text in extracted_texts:
         split_result = text.split('\n')
         split_results.append(split_result)
-    split_results
-    desired_keys = ['No.', 'Date', 'Object','Identification']
-    extracted_key_value_pairs = []
-    for split_result in split_results:
-        key_value_pairs = {}
-        for item in split_result:
-            key, value = item.split(' ', 1)
-            key = key.strip()
-            value = value.strip()
-            if key in desired_keys:
-                key_value_pairs[key] = value
-        extracted_key_value_pairs.append(key_value_pairs)
 
-    # Convert the extracted key-value pairs to a DataFrame
-    df = pd.DataFrame(extracted_key_value_pairs)
+    data = [[item for item in split_result if item != ''] for split_result in split_results]
+    # Extract values and keys
+    values = [item.split(' ', 1)[1].strip() for item in data[0]]
+    keys = [item.split(' ', 1)[0].strip() for item in data[0]]
+
+    # Create a dictionary from keys and values
+    data_dict = dict(zip(keys, values))
+
+    # Create a DataFrame
+    df = pd.DataFrame([data_dict])
+        
     return df
 
 
@@ -95,15 +69,14 @@ def extract_origin_info(image_path, coordinates):
     # Extract "Origin" information
     origin_info = None
     for text in extracted_texts:
-        if 'Origin' in text:
-            origin_info = text.split(':', 1)[1].strip()
+            if 'Origin' in text:
+                origin_info = text.split(':', 1)[1].strip()
 
     # Create a DataFrame with "Origin" as a column header and the extracted data as data
     data = {'Origin': [origin_info]}
     df = pd.DataFrame(data)
 
     return df
-
 
 def extrace_img3(img, coordinates):
     # Process the cropped image and extract text
@@ -157,7 +130,6 @@ def detect_shape(shape):
     else:
         return "Others"
     
-import re
 def detect_origin(origin):
     if not origin.strip():
         return "No origin"
@@ -166,13 +138,14 @@ def detect_origin(origin):
     origin_without_parentheses = re.sub(r'\([^)]*\)', '', origin)
     return origin_without_parentheses.strip()
 
-
-from datetime import datetime
 def reformat_issued_date(issued_date):
     try:
-        # Parse the input date string
-        parsed_date = datetime.strptime(issued_date, '%dth %B %Y')
-        
+        # Remove ordinal suffixes (e.g., "th", "nd", "rd")
+        cleaned_date = re.sub(r'(?<=\d)(st|nd|rd|th)\b', '', issued_date)
+
+        # Parse the cleaned date string
+        parsed_date = datetime.strptime(cleaned_date, '%d %B %Y')
+
         # Reformat the date to YYYY-MM-DD
         reformatted_date = parsed_date.strftime('%Y-%m-%d')
         return reformatted_date
@@ -180,7 +153,7 @@ def reformat_issued_date(issued_date):
         return ""
     
 def detect_mogok(origin):
-    return "(Mogok, Myanmar)" in origin
+    return str("(Mogok, Myanmar)" in origin)
 
 def generate_indication(comment):
     if comment in ["H", "H(a)", "H(b)", "H(c)"]:
@@ -255,12 +228,7 @@ def rename_identification_to_stone(dataframe):
     return dataframe
 
 # Define the function to perform all data processing steps
-def perform_data_processing(img, coordinates):
-    df_1 = process_cropped_images1(img, [coordinates[0]])
-    df_2 = extract_origin_info(img, [coordinates[1]])
-    df_3 = extrace_img3(img, [coordinates[2]])
-    
-    result_df = pd.concat([df_1, df_2, df_3], axis=1)
+def perform_data_processing(result_df):
     
     result_df["Detected_Color"] = result_df["Color"].apply(detect_color)
     result_df["Detected_Cut"] = result_df["Cut"].apply(detect_cut)
@@ -297,6 +265,81 @@ def perform_data_processing(img, coordinates):
     
     return result_df
 
-final_result_df = perform_data_processing(img, coordinates)
 
 
+
+# Define cropping coordinates for different regions
+coordinates = [
+    (570, 910, 168, 1010),
+    (550, 980, 1800, 3000),
+    (1580, 2180, 175, 1400) 
+]
+
+# Specify the folder containing the images
+folder_path = r'C:\Users\kan43\Downloads\Cert Scraping Test'
+
+# Specify the file pattern you want to filter
+file_pattern = "-01_GRS"
+
+df_list = []
+
+# List the image files in the folder
+image_files = [file for file in os.listdir(folder_path) if file.lower().endswith(('.jpg', '.jpeg'))]
+
+for image_file in image_files:
+    if file_pattern in image_file:
+        filename_without_suffix = image_file.split('-')[0]
+        # Read the image
+        img = cv2.imread(os.path.join(folder_path, image_file), cv2.IMREAD_GRAYSCALE)
+        
+        # Process the image and perform data processing
+        df_1 = process_cropped_images1(img, [coordinates[0]])
+        df_2 = extract_origin_info(img, [coordinates[1]])
+        df_3 = extrace_img3(img, [coordinates[2]])
+        result_df = pd.concat([df_1, df_2, df_3], axis=1)
+        result_df = perform_data_processing(result_df)
+        result_df['StoneID'] = filename_without_suffix
+
+        result_df = result_df[[
+                                "certName",
+                                "certNO",
+                                "StoneID",
+                                "displayName",
+                                "Stone",
+                                "Detected_Color",
+                                "Detected_Origin",
+                                "Reformatted_issuedDate",
+                                "Indication",
+                                "oldHeat",
+                                "Mogok",
+                                "Detected_Cut",
+                                "Detected_Shape",
+                                "carat",
+                                "length",
+                                "width",
+                                "height"
+                                ]]
+        result_df = result_df.rename(columns={
+                                "Detected_Color": "Color",
+                                "Detected_Origin": "Origin",
+                                "Reformatted_issuedDate": "issuedDate",
+                                "Detected_Cut": "Cut",
+                                "Detected_Shape": "Shape"
+                            })
+
+        # Append the DataFrame to the list
+        df_list.append(result_df)
+
+# Concatenate all DataFrames into one large DataFrame
+final_df = pd.concat(df_list, ignore_index=True)
+
+# Display the final DataFrame
+st.write(final_df)
+
+csv_data = final_df.to_csv(index=False).encode('utf-8')
+st.download_button(
+    label="Download CSV",
+    data=csv_data,
+    file_name="Cert.csv",
+    key="download-button"
+)
