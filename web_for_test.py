@@ -273,7 +273,7 @@ coordinates = [
 ]
 
 # Specify the folder containing the images
-folder_path = r'git ls-files path/to/Trinsararom/image.ext'
+folder_path = 'path/to/Trinsararom/image'
 
 # Specify the file pattern you want to filter
 file_pattern = "-01_GRS"
