@@ -3,3 +3,4 @@ opencv-python-headless==4.8.0.76  # Use 'opencv-python-headless' to avoid graphi
 streamlit==1.21.0
 pandas==1.4.1
 numpy==1.24.1
+PyGithub==1.59.1
