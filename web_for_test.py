@@ -272,22 +272,35 @@ coordinates = [
     (1580, 2180, 175, 1400) 
 ]
 
-# Specify the folder containing the images
-folder_path = 'https://github.com/Trinsararom/cert/tree/67b3acb0bbdb41a1229a66d4c4eee83210125e49/image'
+from github import Github
+
+# Specify the GitHub repository and file path
+repository_url = 'https://github.com/Trinsararom/cert'
+file_path = 'image'  # Replace with the correct path
 
 # Specify the file pattern you want to filter
 file_pattern = "-01_GRS"
 
 df_list = []
 
-# List the image files in the folder
-image_files = [file for file in os.listdir(folder_path) if file.lower().endswith(('.jpg', '.jpeg'))]
+# Initialize PyGitHub
+g = Github()
+
+# Get the GitHub repository
+repo = g.get_repo('Trinsararom/cert')
+
+# Get the contents of the specified directory
+contents = repo.get_contents(file_path)
+
+# List the image files in the directory
+image_files = [file for file in contents if file.name.lower().endswith(('.jpg', '.jpeg'))]
 
 for image_file in image_files:
-    if file_pattern in image_file:
-        filename_without_suffix = image_file.split('-')[0]
-        # Read the image
-        img = cv2.imread(os.path.join(folder_path, image_file), cv2.IMREAD_GRAYSCALE)
+    if file_pattern in image_file.name:
+        filename_without_suffix = image_file.name.split('-')[0]
+        # Read the image (requires downloading)
+        image_content = image_file.content
+        img = cv2.imdecode(np.frombuffer(image_content, np.uint8), cv2.IMREAD_GRAYSCALE)
         
         # Process the image and perform data processing
         df_1 = process_cropped_images1(img, [coordinates[0]])
