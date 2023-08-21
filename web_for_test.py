@@ -273,7 +273,7 @@ coordinates = [
 ]
 
 # Specify the folder containing the images
-folder_path = 'path/to/Trinsararom/image'
+folder_path = 'https://github.com/Trinsararom/cert/tree/67b3acb0bbdb41a1229a66d4c4eee83210125e49/image'
 
 # Specify the file pattern you want to filter
 file_pattern = "-01_GRS"
