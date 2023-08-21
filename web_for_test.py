@@ -16,13 +16,7 @@ st.set_page_config(
 
 st.title('Certicatate Scraper')
 
-# Initialize the Tesseract OCR
-def initialize_tesseract():
-    tesseract_exec_path = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-    # pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-
-# Initialize Tesseract
-initialize_tesseract()
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def process_cropped_images(img, coordinates):
     result = []
