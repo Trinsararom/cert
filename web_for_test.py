@@ -7,6 +7,7 @@ import zipfile
 import pandas as pd
 import streamlit as st
 import numpy as np
+import io
 
 st.set_page_config(
     page_title="Cert",
@@ -279,66 +280,71 @@ folder_path = r'C:\Users\kan43\Downloads\Cert Scraping Test'
 # Specify the file pattern you want to filter
 file_pattern = "-01_GRS"
 
-df_list = []
+# Create a Streamlit file uploader for the zip file
+zip_file = st.file_uploader("Upload a ZIP file containing images", type=["zip"])
 
-# List the image files in the folder
-image_files = [file for file in os.listdir(folder_path) if file.lower().endswith(('.jpg', '.jpeg'))]
+if zip_file is not None:
+    # Extract the uploaded ZIP file
+    with zipfile.ZipFile(zip_file) as zip_data:
+        df_list = []
 
-for image_file in image_files:
-    if file_pattern in image_file:
-        filename_without_suffix = image_file.split('-')[0]
-        # Read the image
-        img = cv2.imread(os.path.join(folder_path, image_file), cv2.IMREAD_GRAYSCALE)
-        
-        # Process the image and perform data processing
-        df_1 = process_cropped_images1(img, [coordinates[0]])
-        df_2 = extract_origin_info(img, [coordinates[1]])
-        df_3 = extrace_img3(img, [coordinates[2]])
-        result_df = pd.concat([df_1, df_2, df_3], axis=1)
-        result_df = perform_data_processing(result_df)
-        result_df['StoneID'] = filename_without_suffix
+        for image_file in zip_data.namelist():
+            if file_pattern in image_file:
+                filename_without_suffix = image_file.split('-')[0]
+                # Read the image
+                with zip_data.open(image_file) as file:
+                    img_data = io.BytesIO(file.read())
+                    img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
+                    
+                    # Process the image and perform data processing
+                    df_1 = process_cropped_images1(img, [coordinates[0]])
+                    df_2 = extract_origin_info(img, [coordinates[1]])
+                    df_3 = extrace_img3(img, [coordinates[2]])
+                    result_df = pd.concat([df_1, df_2, df_3], axis=1)
+                    result_df = perform_data_processing(result_df)
+                    result_df['StoneID'] = filename_without_suffix
 
-        result_df = result_df[[
-                                "certName",
-                                "certNO",
-                                "StoneID",
-                                "displayName",
-                                "Stone",
-                                "Detected_Color",
-                                "Detected_Origin",
-                                "Reformatted_issuedDate",
-                                "Indication",
-                                "oldHeat",
-                                "Mogok",
-                                "Detected_Cut",
-                                "Detected_Shape",
-                                "carat",
-                                "length",
-                                "width",
-                                "height"
-                                ]]
-        result_df = result_df.rename(columns={
-                                "Detected_Color": "Color",
-                                "Detected_Origin": "Origin",
-                                "Reformatted_issuedDate": "issuedDate",
-                                "Detected_Cut": "Cut",
-                                "Detected_Shape": "Shape"
-                            })
+                    result_df = result_df[[
+                        "certName",
+                        "certNO",
+                        "StoneID",
+                        "displayName",
+                        "Stone",
+                        "Detected_Color",
+                        "Detected_Origin",
+                        "Reformatted_issuedDate",
+                        "Indication",
+                        "oldHeat",
+                        "Mogok",
+                        "Detected_Cut",
+                        "Detected_Shape",
+                        "carat",
+                        "length",
+                        "width",
+                        "height"
+                    ]]
+                    result_df = result_df.rename(columns={
+                        "Detected_Color": "Color",
+                        "Detected_Origin": "Origin",
+                        "Reformatted_issuedDate": "issuedDate",
+                        "Detected_Cut": "Cut",
+                        "Detected_Shape": "Shape"
+                    })
 
-        # Append the DataFrame to the list
-        df_list.append(result_df)
+                    # Append the DataFrame to the list
+                    df_list.append(result_df)
 
-# Concatenate all DataFrames into one large DataFrame
-final_df = pd.concat(df_list, ignore_index=True)
+        # Concatenate all DataFrames into one large DataFrame
+        final_df = pd.concat(df_list, ignore_index=True)
 
-# Display the final DataFrame
-st.write(final_df)
+        # Display the final DataFrame
+        st.write(final_df)
 
-csv_data = final_df.to_csv(index=False).encode('utf-8')
-st.download_button(
-    label="Download CSV",
-    data=csv_data,
-    file_name="Cert.csv",
-    key="download-button"
-)
+        csv_data = final_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Download CSV",
+            data=csv_data,
+            file_name="Cert.csv",
+            key="download-button"
+        )
 
