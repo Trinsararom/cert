@@ -273,7 +273,7 @@ coordinates = [
 ]
 
 # Specify the folder containing the images
-folder_path = r'C:\Users\kan43\Downloads\Cert Scraping Test'
+folder_path = r'image'
 
 # Specify the file pattern you want to filter
 file_pattern = "-01_GRS"
