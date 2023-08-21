@@ -1,11 +1,8 @@
 import pytesseract
-from PIL import Image
-import matplotlib.pyplot as plt
 import cv2
 from datetime import datetime
 import os
 import re
-import zipfile
 import pandas as pd
 import streamlit as st
 import numpy as np
