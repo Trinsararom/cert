@@ -1,5 +1,5 @@
 pytesseract==0.3.10
-opencv-python-headless==4.8.0.7  # Use 'opencv-python-headless' to avoid graphical user interface (GUI) dependencies
+opencv-python-headless==4.8.0.76  # Use 'opencv-python-headless' to avoid graphical user interface (GUI) dependencies
 streamlit==1.21.0
 pandas==1.4.1
 numpy==1.24.1
