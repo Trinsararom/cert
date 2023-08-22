@@ -16,6 +16,8 @@ st.set_page_config(
 
 st.title('Certicatate Scraper')
 
+pytesseract.pytesseract.tesseract_cmd = None
+
 # set tesseract path
 @st.cache_resource
 def set_tesseract_path(tesseract_path: str):
