@@ -303,6 +303,9 @@ if zip_file is not None:
                     result_df = pd.concat([df_1, df_2, df_3], axis=1)
                     result_df = perform_data_processing(result_df)
                     result_df['StoneID'] = filename_without_suffix
+                    result_df["StoneID"] = result_df["StoneID"].str.split("/")
+                    # Get the last part of each split
+                    result_df["StoneID"] = result_df["StoneID"].str.get(-1)
 
                     result_df = result_df[[
                         "certName",
