@@ -120,9 +120,9 @@ def detect_cut(cut):
     
 def detect_shape(shape):
     valid_shapes = [
-        "Cushion", "Heart", "Marquise", "Octagonal", "Oval",
-        "Pear", "Rectangular", "Round", "Square", "Triangular",
-        "Star", "Sugarloaf", "Tumbled"
+        "cushion", "heart", "marquise", "octagonal", "oval",
+        "pear", "rectangular", "round", "square", "triangular",
+        "star", "sugarloaf", "tumbled"
     ]
     if shape in valid_shapes:
         return shape
