@@ -16,7 +16,31 @@ st.set_page_config(
 
 st.title('Certicatate Scraper')
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# set tesseract path
+@st.cache_resource
+def set_tesseract_path(tesseract_path: str):
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
+    
+# set tesseract binary path
+pytesseract.pytesseract.tesseract_cmd = tesseract.find_tesseract_binary()
+if not pytesseract.pytesseract.tesseract_cmd:
+    st.error("Tesseract binary not found in PATH. Please install Tesseract.")
+    st.stop()
+
+# check if tesseract is installed
+try:
+    tesseract_version = pytesseract.get_tesseract_version()
+except pytesseract.TesseractNotFoundError:
+    st.error("TesseractNotFoundError: Tesseract is not installed. Please install Tesseract.")
+    st.stop()
+except Exception as e:
+    st.error("Unexpected Exception")
+    st.error(f"Error Message: {e}")
+    st.stop()
+else:
+    if not tesseract_version:
+        st.error("Tesseract is not installed. Please install Tesseract.")
+        st.stop()
 
 def process_cropped_images(img, coordinates):
     result = []
