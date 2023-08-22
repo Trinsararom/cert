@@ -8,6 +8,7 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 import io
+from config import tesseract_exec_path
 
 st.set_page_config(
     page_title="Cert",
@@ -18,7 +19,7 @@ st.title('Certicatate Scraper')
 
 # Initialize the Tesseract OCR
 def initialize_tesseract():
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = tesseract_exec_path
 
 # Initialize Tesseract
 initialize_tesseract()
