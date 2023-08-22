@@ -16,7 +16,7 @@ st.set_page_config(
 
 st.title('Certicatate Scraper')
 
-pytesseract.pytesseract.tesseract_cmd = None
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # set tesseract path
 @st.cache_resource
