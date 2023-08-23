@@ -271,6 +271,9 @@ def main():
     # Create an instance of the OCR class
     ocr = OCR()
 
+    # Specify the file pattern you want to filter
+    file_pattern = "-01_GRS"
+
     # Create a Streamlit file uploader for the zip file
     zip_file = st.file_uploader("Upload a ZIP file containing images", type=["zip"])
 
