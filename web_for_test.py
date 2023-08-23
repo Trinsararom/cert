@@ -19,7 +19,7 @@ st.title('Certicatate Scraper')
 
 # Initialize the Tesseract OCR
 def initialize_tesseract():
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = '/usr/share/tesseract-ocr/4.00/tessdata/'
 
 # Initialize Tesseract
 initialize_tesseract()
