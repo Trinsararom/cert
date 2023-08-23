@@ -263,6 +263,9 @@ class OCR:
 
 # Create a Streamlit App
 def main():
+    
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    
     st.set_page_config(
         page_title="Cert",
         layout='wide',
