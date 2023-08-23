@@ -258,6 +258,8 @@ class OCR:
         ]]
 
         return result_df
+    
+
 
 # Create a Streamlit App
 def main():
@@ -278,7 +280,7 @@ def main():
     zip_file = st.file_uploader("Upload a ZIP file containing images", type=["zip"])
 
     if zip_file is not None:
-        # Extract the uploaded ZIP file
+    # Extract the uploaded ZIP file
         with zipfile.ZipFile(zip_file) as zip_data:
             df_list = []
 
@@ -291,16 +293,16 @@ def main():
                         img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
                         
                         # Process the image and perform data processing
-                        df_1 = process_cropped_images1(img, [coordinates[0]])
-                        df_2 = extract_origin_info(img, [coordinates[1]])
-                        df_3 = extrace_img3(img, [coordinates[2]])
+                        df_1 = ocr.process_cropped_images1(img, [ocr.coordinates[0]])  # Call the method using 'ocr'
+                        df_2 = ocr.extract_origin_info(img, [ocr.coordinates[1]])  # Call the method using 'ocr'
+                        df_3 = ocr.extrace_img3(img, [ocr.coordinates[2]])  # Call the method using 'ocr'
                         result_df = pd.concat([df_1, df_2, df_3], axis=1)
-                        result_df = perform_data_processing(result_df)
+                        result_df = ocr.perform_data_processing(result_df)  # Call the method using 'ocr'
                         result_df['StoneID'] = filename_without_suffix
                         result_df["StoneID"] = result_df["StoneID"].str.split("/")
                         # Get the last part of each split
                         result_df["StoneID"] = result_df["StoneID"].str.get(-1)
-    
+
                         result_df = result_df[[
                             "certName",
                             "certNO",
@@ -327,7 +329,7 @@ def main():
                             "Detected_Cut": "Cut",
                             "Detected_Shape": "Shape"
                         })
-    
+
                         # Append the DataFrame to the list
                         df_list.append(result_df)
 
@@ -348,4 +350,3 @@ def main():
 # Run the Streamlit app
 if __name__ == "__main__":
     main()
-
