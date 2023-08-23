@@ -18,12 +18,12 @@ st.set_page_config(
 st.title('Certicatate Scraper')
 
 # Initialize the Tesseract OCR
-def test_wrong_tesseract_cmd(test_file, test_path):
-    """Test wrong or missing tesseract command."""
-    pytesseract.pytesseract.tesseract_cmd = test_path
-    with pytest.raises(TesseractNotFoundError):
-        pytesseract.pytesseract.image_to_string(test_file)
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# Initialize the Tesseract OCR
+def initialize_tesseract():
+    pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+
+# Initialize Tesseract
+initialize_tesseract()
 
 def process_cropped_images(img, coordinates):
     result = []
