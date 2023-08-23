@@ -1,4 +1,4 @@
-tesseract_exec_path = r'home/user/bin/tesseract'
+tesseract_exec_path = 'C:\Users\USER\AppData\Local\Tesseract-OCR'
 
 
 
