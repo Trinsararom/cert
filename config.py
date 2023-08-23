@@ -1,4 +1,4 @@
-tesseract_exec_path = r'/usr/bin/tesseract'
+tesseract_exec_path = 'C:/OCR/Tesseract-OCR/tesseract.exe'
 
 
 
