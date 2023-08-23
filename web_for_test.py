@@ -280,8 +280,53 @@ def main():
             df_list = []
 
             for image_file in zip_data.namelist():
-                # Rest of your code for processing images and creating DataFrames goes here...
-                pass
+                if file_pattern in image_file:
+                    filename_without_suffix = image_file.split('-')[0]
+                    # Read the image
+                    with zip_data.open(image_file) as file:
+                        img_data = io.BytesIO(file.read())
+                        img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
+                        
+                        # Process the image and perform data processing
+                        df_1 = process_cropped_images1(img, [coordinates[0]])
+                        df_2 = extract_origin_info(img, [coordinates[1]])
+                        df_3 = extrace_img3(img, [coordinates[2]])
+                        result_df = pd.concat([df_1, df_2, df_3], axis=1)
+                        result_df = perform_data_processing(result_df)
+                        result_df['StoneID'] = filename_without_suffix
+                        result_df["StoneID"] = result_df["StoneID"].str.split("/")
+                        # Get the last part of each split
+                        result_df["StoneID"] = result_df["StoneID"].str.get(-1)
+    
+                        result_df = result_df[[
+                            "certName",
+                            "certNO",
+                            "StoneID",
+                            "displayName",
+                            "Stone",
+                            "Detected_Color",
+                            "Detected_Origin",
+                            "Reformatted_issuedDate",
+                            "Indication",
+                            "oldHeat",
+                            "Mogok",
+                            "Detected_Cut",
+                            "Detected_Shape",
+                            "carat",
+                            "length",
+                            "width",
+                            "height"
+                        ]]
+                        result_df = result_df.rename(columns={
+                            "Detected_Color": "Color",
+                            "Detected_Origin": "Origin",
+                            "Reformatted_issuedDate": "issuedDate",
+                            "Detected_Cut": "Cut",
+                            "Detected_Shape": "Shape"
+                        })
+    
+                        # Append the DataFrame to the list
+                        df_list.append(result_df)
 
             # Concatenate all DataFrames into one large DataFrame
             final_df = pd.concat(df_list, ignore_index=True)
