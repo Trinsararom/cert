@@ -1,4 +1,3 @@
-tesseract
 pytesseract==0.3.10
 opencv-python-headless==4.8.0.76  # Use 'opencv-python-headless' to avoid graphical user interface (GUI) dependencies
 streamlit==1.21.0
