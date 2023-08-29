@@ -170,7 +170,7 @@ def reformat_issued_date(issued_date):
     cleaned_date = re.sub(r'(?<=\d)(st|nd|rd|th)\b', '', issued_date.replace("‘", "").replace("I", "1").replace("S", "5").strip())
 
     # Parse the cleaned date string
-    parsed_date = datetime.strptime(cleaned_date, '%d %B %Y')
+    #parsed_date = datetime.strptime(cleaned_date, '%d %B %Y')
 
     # Reformat the date to YYYY-MM-DD
     reformatted_date = cleaned_date
