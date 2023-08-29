@@ -167,7 +167,7 @@ def detect_origin(origin):
 def reformat_issued_date(issued_date):
     try:
         # Remove ordinal suffixes (e.g., "th", "nd", "rd")
-        cleaned_date = re.sub(r'(?<=\d)(st|nd|rd|th)\b', '', issued_date.replace("‘", "").replace("I", "1").strip())
+        cleaned_date = re.sub(r'(?<=\d)(st|nd|rd|th)\b', '', issued_date.replace("‘", "").replace("I", "1").replace("S", "5").strip())
 
         # Parse the cleaned date string
         parsed_date = datetime.strptime(cleaned_date, '%d %B %Y')
