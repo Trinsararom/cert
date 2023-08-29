@@ -15,7 +15,7 @@ st.set_page_config(
     layout = 'wide',
 )
 
-st.title('Certicatate Scraper')
+st.title('Cert Scraper')
 
 # Initialize the Tesseract OCR
 def initialize_tesseract():
