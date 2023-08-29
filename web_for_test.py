@@ -173,7 +173,7 @@ def reformat_issued_date(issued_date):
         parsed_date = datetime.strptime(cleaned_date, '%d %B %Y')
 
         # Reformat the date to YYYY-MM-DD
-        reformatted_date = parsed_date.strftime('%Y-%m-%d')
+        reformatted_date = cleaned_date
         return reformatted_date
     except ValueError:
         return ""
@@ -221,7 +221,7 @@ def convert_carat_to_numeric(value_with_unit):
     return numeric_value
 
 def convert_dimension(dimension_str):
-    parts = dimension_str.replace("—_", "").replace("_", "").replace("§", "5").replace(",", ".").replace(" =", "").split(" x ")
+    parts = dimension_str.replace("—_", "").replace("_", "").replace("§", "5").replace(",", ".").replace(" = ", "").split(" x ")
     if len(parts) == 3 and parts[-1].endswith(" (mm)"):
         length = (parts[0])
         width = (parts[1])
