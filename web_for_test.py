@@ -73,7 +73,7 @@ def extract_gemstone_info(img):
     # Process cropped images and get the extracted text
     extracted_texts = process_cropped_images(crop1)
 
-    extracted_texts = extracted_texts.replace('‘', "")
+    extracted_texts = extracted_texts.replace('‘', "").replace(',', ".")
     # Split the text into lines
     lines = extracted_texts.split('\n')
 
