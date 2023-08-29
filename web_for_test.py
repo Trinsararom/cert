@@ -1,13 +1,15 @@
 import pytesseract
+from PIL import Image
+import matplotlib.pyplot as plt
 import cv2
 from datetime import datetime
 import os
 import re
 import zipfile
+import io
 import pandas as pd
 import streamlit as st
 import numpy as np
-import io
 
 st.set_page_config(
     page_title="Cert",
@@ -18,98 +20,127 @@ st.title('Certicatate Scraper')
 
 # Initialize the Tesseract OCR
 def initialize_tesseract():
-    pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Initialize Tesseract
 initialize_tesseract()
 
-def process_cropped_images(img, coordinates):
-    result = []
+def crop_image(img):
 
-    for idx, (upper, lower, left, right) in enumerate(coordinates):
-        crop = img[upper:lower, left:right]
+    # Get the dimensions of the original image
+    height, width, channels = img.shape if len(img.shape) == 3 else (img.shape[0], img.shape[1], 1)
 
-        # Perform OCR on the cropped image
-        extracted_text = pytesseract.image_to_string(crop)
+    # Calculate the width for crop1 (e.g., 50% of the original width)
+    crop1_width = width // 2
 
-        result.append(extracted_text.strip())
+    # Calculate the width for crop2
+    crop2_width = width - crop1_width
 
-    return result
+    # Calculate the coordinates for cropping crop1 and crop2
+    top = 0
+    bottom = height
+    left_crop1 = 0
+    right_crop1 = crop1_width
+    left_crop2 = crop1_width
+    right_crop2 = width
 
-def process_cropped_images1(img, coordinates):
+    # Crop the two parts
+    crop1 = img[top:bottom, left_crop1:right_crop1]
+    crop2 = img[top:bottom, left_crop2:right_crop2]
+
+    # Calculate the dimensions for crop3 (top half of crop2)
+    crop3_height = int(crop2.shape[0] // 2.4)
+
+    # Crop the top half of crop2 to create crop3
+    top_crop3 = 0
+    bottom_crop3 = crop3_height
+    left_crop3 = 0
+    right_crop3 = crop2.shape[1]
+
+    crop3 = crop2[top_crop3:bottom_crop3, left_crop3:right_crop3]
+
+    return crop1, crop3
+
+def process_cropped_images(img):
+    # Perform OCR on the cropped image
+    extracted_text = pytesseract.image_to_string(img)
+
+    return extracted_text
+
+def extract_gemstone_info(img):
+    # Assuming you have the functions crop_image and process_cropped_images defined elsewhere
+    crop1, crop3 = crop_image(img)
+
     # Process cropped images and get the extracted text
-    extracted_texts = process_cropped_images(img, coordinates)
-    
-    split_results = []
-    for text in extracted_texts:
-        split_result = text.split('\n')
-        split_results.append(split_result)
+    extracted_texts = process_cropped_images(crop1)
 
-    data = [[item for item in split_result if item != ''] for split_result in split_results]
-    # Extract values and keys
-    values = [item.split(' ', 1)[1].strip() for item in data[0]]
-    keys = [item.split(' ', 1)[0].strip() for item in data[0]]
+    extracted_texts = extracted_texts.replace('‘', "")
+    # Split the text into lines
+    lines = extracted_texts.split('\n')
 
-    # Create a dictionary from keys and values
-    data_dict = dict(zip(keys, values))
+    # Initialize variables to store extracted information
+    extracted_info = {}
+
+    # Keywords in lowercase
+    keywords = ["no. grs", "date", "object", "identification", "weight", "dimensions", "cut", "shape", "color", "comment"]
+
+    # Iterate through the lines to find relevant information
+    for line in lines:
+        line_lower = line.lower()
+        for keyword in keywords:
+            if line_lower.startswith(keyword):
+                key, value = line.split(maxsplit=1)
+                extracted_info[keyword] = value.strip()
+
+    # Define custom column names
+    custom_column_names = ["No.", "Date", "Object", "Identification", "Weight", "Dimensions", "Cut", "Shape", "Color", "Comment"]
+
+    # Create a DataFrame from the extracted information using custom column names
+    data_dict = {}
+    for keyword, col_name in zip(keywords, custom_column_names):
+        value = extracted_info.get(keyword, "")
+        if keyword == "no. grs":
+            value = lines[5].strip() if keyword not in extracted_info else extracted_info[keyword]
+        elif keyword == "date":
+            value = lines[6].strip() if keyword not in extracted_info else extracted_info[keyword]
+        elif keyword == "object":
+            value = lines[7].strip() if keyword not in extracted_info else extracted_info[keyword]
+        elif keyword == "identification":
+            value = lines[8].strip() if keyword not in extracted_info else extracted_info[keyword]
+        data_dict[col_name] = [value]
+
+    # Create a DataFrame from the dictionary
+    df = pd.DataFrame(data_dict)
+
+    return df
+
+def extract_origin_info(img):
+    # Crop the image
+    crop1, crop3 = crop_image(img)
+
+    # Process cropped images and get the extracted text
+    extracted_texts = process_cropped_images(crop3)
+
+    # Split the extracted text into lines and filter out empty lines
+    lines = [line for line in extracted_texts.splitlines() if line.strip()]
 
     # Create a DataFrame
-    df = pd.DataFrame([data_dict])
-        
-    return df
-
-
-def extract_origin_info(image_path, coordinates):
-
-    # Process cropped images and get the extracted text
-    extracted_texts = process_cropped_images(img, coordinates)
-
-    # Extract "Origin" information
-    origin_info = None
-    for text in extracted_texts:
-            if 'Origin' in text:
-                origin_info = text.split(':', 1)[1].strip()
-
-    # Create a DataFrame with "Origin" as a column header and the extracted data as data
-    data = {'Origin': [origin_info]}
-    df = pd.DataFrame(data)
-
-    return df
-
-def extrace_img3(img, coordinates):
-    # Process the cropped image and extract text
-    extracted_texts = process_cropped_images(img, coordinates)
-
-    # Initialize the list to store extracted values
-    list1 = []
-
-    # Process each extracted text
-    for text in extracted_texts:
-        lines = text.split('\n')
-        for line in lines:
-            if line.strip() and any(char.isalpha() for char in line):
-                list1.append(line.strip())
-    
-    header = list1[:6]
-    header.append('comment')
-    data_header = list1[6:]
-    
-    df = pd.DataFrame([data_header], columns=header)
-    df['comment'] = df['Comment'] + ' ' + df['comment']
-    df['Dimensions'] = df['Dimensions'].str.replace('$', '5', regex=False)
-    df = df.drop(columns=['comment'])
+    df = pd.DataFrame({'Origin': [lines[-1]]})
     
     return df
+
 
 def detect_color(text):
-    if "PigeonsBlood" in text:
+    if "Color is PigeonsBlood" in text:
         return "PigeonsBlood"
-    elif "*" in text:
+    elif "Color contains *" in text:
         return "PigeonsBlood"
-    elif "pigeon-blood" in text:
+    elif "(GRS type \"pigeon's blood\")"  in text:
+        return "PigeonsBlood"
+    elif "(GR type \"pigeon's blood\")" in text:
         return "PigeonsBlood"
     else:
-        return None
+        return text
     
 def detect_cut(cut):
     if cut != "Cabochon":
@@ -133,13 +164,13 @@ def detect_origin(origin):
         return "No origin"
     
     # Remove words in parentheses
-    origin_without_parentheses = re.sub(r'\([^)]*\)', '', origin)
+    origin_without_parentheses = origin
     return origin_without_parentheses.strip()
 
 def reformat_issued_date(issued_date):
     try:
         # Remove ordinal suffixes (e.g., "th", "nd", "rd")
-        cleaned_date = re.sub(r'(?<=\d)(st|nd|rd|th)\b', '', issued_date)
+        cleaned_date = re.sub(r'(?<=\d)(st|nd|rd|th)\b', '', issued_date.replace("‘", "").strip())
 
         # Parse the cleaned date string
         parsed_date = datetime.strptime(cleaned_date, '%d %B %Y')
@@ -156,10 +187,8 @@ def detect_mogok(origin):
 def generate_indication(comment):
     if comment in ["H", "H(a)", "H(b)", "H(c)"]:
         return "Heated"
-    elif comment == "No indication of thermal treatment":
-        return "Unheated"
     else:
-        return "Unknown"
+        return "Unheated"
     
 def detect_old_heat(comment, indication):
     if indication == "Heated":
@@ -170,59 +199,42 @@ def detect_old_heat(comment, indication):
 def generate_display_name(color, origin):
     display_name = ""
 
-    if "*" in color:
-        display_name = "PGB*"
-    elif color == "Red":
-        display_name = "GRS"
-    elif color == "PigeonsBlood":
-        display_name = "PGB"
+    if color is not None:
+        if "*" in color:
+            display_name = "PGB*"
+        elif color == "red":
+            display_name = "GRS"
+        elif color == "PigeonsBlood":
+            display_name = "PGB"
     
     if "(Mogok, Myanmar)" in origin:
         display_name = "MG-" + display_name
     
     return display_name
 
-certificate_acronyms = {
-    "GRS": "GRS",
-    "SSEF": "SSEF",
-    "GBL": "GBL",
-    "CDC": "CDC",
-    "AIGS": "AIGS",
-    "AGL" : "AGL",
-    "BELL" : "BELL",
-    "GCI" : "GCI",
-    "GIT" : "GIT",
-    "GGT" : "GGT",
-    "ICL" : "ICL",
-    "LOTUS" : "LOTUS",
-    "ICA" : "ICA",
-}
-
 # Define the function to extract the year and number from certNO
-def extract_cert_info(certNO):
-    parts = certNO.split("-")
-    if len(parts) == 2:
-        cert_name = parts[0][:-4]  # Extract the first part of the certificate name (e.g., "GRS")
-        cert_number = parts[0][-4:] + "-" + parts[1]  # Extract the last four characters and combine with the year
-        return cert_name, cert_number
-    return "", ""
+def extract_cert_info(df,certNO):
+    # Split the specified column into two columns
+    df[['certName', 'certNO']] = df[certNO].str.extract(r'(\D+)(\d+.*)')
+    return df
 
 def convert_carat_to_numeric(value_with_unit):
-    value_without_unit = value_with_unit.replace(" ct", "")
-    numeric_value = float(value_without_unit)
+    value_without_unit = value_with_unit.replace(" ct", "").replace(" et", "").replace(" ot", "")
+    numeric_value = (value_without_unit)
     return numeric_value
 
 def convert_dimension(dimension_str):
-    parts = dimension_str.split(" x ")
+    parts = dimension_str.replace("—_", "").replace("_", "").replace("§", "5").replace(",", ".").replace("=", "").split(" x ")
     if len(parts) == 3 and parts[-1].endswith(" (mm)"):
-        length = float(parts[0])
-        width = float(parts[1])
-        height = float(parts[2][:-5])  # Remove " (mm)" from the last part
+        length = (parts[0])
+        width = (parts[1])
+        height = (parts[2][:-5])  # Remove " (mm)" from the last part
         return length, width, height
     return None, None, None
 
 def rename_identification_to_stone(dataframe):
     dataframe.rename(columns={"Identification": "Stone"}, inplace = True)
+    dataframe["Stone"] = dataframe["Stone"].str.replace("‘", "").str.strip()
     return dataframe
 
 # Define the function to perform all data processing steps
@@ -236,8 +248,8 @@ def perform_data_processing(result_df):
     result_df["Mogok"] = result_df["Origin"].apply(detect_mogok)
     result_df["Indication"] = result_df["Comment"].apply(generate_indication)
     result_df["oldHeat"] = result_df.apply(lambda row: detect_old_heat(row["Comment"], row["Indication"]), axis=1)
-    result_df["displayName"] = result_df.apply(lambda row: generate_display_name(row["Color"], row["Origin"]), axis=1)
-    result_df["certName"], result_df["certNO"] = zip(*result_df["No."].apply(extract_cert_info))
+    result_df["displayName"] = result_df.apply(lambda row: generate_display_name(row["Detected_Color"], row["Detected_Origin"]), axis=1)
+    result_df = extract_cert_info(result_df, 'No.')
     result_df["carat"] = result_df["Weight"].apply(convert_carat_to_numeric)
     result_df[["length", "width", "height"]] = result_df["Dimensions"].apply(convert_dimension).apply(pd.Series)
     result_df = rename_identification_to_stone(result_df)
@@ -262,17 +274,7 @@ def perform_data_processing(result_df):
     ]]
     
     return result_df
-
-
-
-
-# Define cropping coordinates for different regions
-coordinates = [
-    (570, 910, 168, 1010),
-    (550, 980, 1800, 3000),
-    (1580, 2180, 175, 1400) 
-]
-
+    
 # Specify the folder containing the images
 # folder_path = r'C:\Users\kan43\Downloads\Cert Scraping Test'
 
