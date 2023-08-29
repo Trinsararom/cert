@@ -214,6 +214,7 @@ def generate_display_name(color, origin):
 def extract_cert_info(df,certNO):
     # Split the specified column into two columns
     df[['certName', 'certNO']] = df[certNO].str.extract(r'(\D+)(\d+.*)')
+    df['certName'] = df['certName'].str.replace('No,', '')
     return df
 
 def convert_carat_to_numeric(value_with_unit):
