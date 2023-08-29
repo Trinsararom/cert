@@ -19,7 +19,7 @@ st.title('Certicatate Scraper')
 
 # Initialize the Tesseract OCR
 def initialize_tesseract():
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = = r'/usr/bin/tesseract'
 
 # Initialize Tesseract
 initialize_tesseract()
@@ -297,11 +297,12 @@ if zip_file is not None:
                     img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
                     
                     # Process the image and perform data processing
-                    df_1 = process_cropped_images1(img, [coordinates[0]])
-                    df_2 = extract_origin_info(img, [coordinates[1]])
-                    df_3 = extrace_img3(img, [coordinates[2]])
-                    result_df = pd.concat([df_1, df_2, df_3], axis=1)
+                    # Process the image and perform data processing
+                    df_1 = extract_gemstone_info(img)
+                    df_2 = extract_origin_info(img)
+                    result_df = pd.concat([df_1, df_2], axis=1)
                     result_df = perform_data_processing(result_df)
+
                     result_df['StoneID'] = filename_without_suffix
                     result_df["StoneID"] = result_df["StoneID"].str.split("/")
                     # Get the last part of each split
