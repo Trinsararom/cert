@@ -136,8 +136,6 @@ def detect_color(text):
         return "PigeonsBlood"
     elif "(GRS type \"pigeon's blood\")"  in text:
         return "PigeonsBlood"
-    elif "(GR type \"pigeon's blood\")" in text:
-        return "PigeonsBlood"
     else:
         return text
     
@@ -169,7 +167,7 @@ def detect_origin(origin):
 def reformat_issued_date(issued_date):
     try:
         # Remove ordinal suffixes (e.g., "th", "nd", "rd")
-        cleaned_date = re.sub(r'(?<=\d)(st|nd|rd|th)\b', '', issued_date.replace("‘", "").strip())
+        cleaned_date = re.sub(r'(?<=\d)(st|nd|rd|th)\b', '', issued_date.replace("‘", "").replace("I", "1").strip())
 
         # Parse the cleaned date string
         parsed_date = datetime.strptime(cleaned_date, '%d %B %Y')
@@ -223,7 +221,7 @@ def convert_carat_to_numeric(value_with_unit):
     return numeric_value
 
 def convert_dimension(dimension_str):
-    parts = dimension_str.replace("—_", "").replace("_", "").replace("§", "5").replace(",", ".").replace("=", "").split(" x ")
+    parts = dimension_str.replace("—_", "").replace("_", "").replace("§", "5").replace(",", ".").replace(" =", "").split(" x ")
     if len(parts) == 3 and parts[-1].endswith(" (mm)"):
         length = (parts[0])
         width = (parts[1])
