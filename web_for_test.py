@@ -295,7 +295,9 @@ if zip_file is not None:
                     # Read the image
                     with zip_data.open(image_file) as file:
                         img_data = io.BytesIO(file.read())
-                        img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
+                        img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), 0)
+                        noiseless_image_bw = cv2.fastNlMeansDenoising(img, None, 20, 7, 21)
+                        img = noiseless_image_bw
                         
                         # Process the image and perform data processing
                         # Process the image and perform data processing
