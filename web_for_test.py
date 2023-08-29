@@ -217,7 +217,7 @@ def extract_cert_info(df,certNO):
     return df
 
 def convert_carat_to_numeric(value_with_unit):
-    value_without_unit = value_with_unit.replace(" ct", "").replace(" et", "").replace(" ot", "")
+    value_without_unit = value_with_unit.replace(" ct", "").replace(" et", "").replace(" ot", "").replace(" mS", "").replace("=", "")
     numeric_value = (value_without_unit)
     return numeric_value
 
@@ -290,52 +290,57 @@ if zip_file is not None:
         for image_file in zip_data.namelist():
             if file_pattern in image_file:
                 filename_without_suffix = image_file.split('-')[0]
-                # Read the image
-                with zip_data.open(image_file) as file:
-                    img_data = io.BytesIO(file.read())
-                    img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
-                    
-                    # Process the image and perform data processing
-                    # Process the image and perform data processing
-                    df_1 = extract_gemstone_info(img)
-                    df_2 = extract_origin_info(img)
-                    result_df = pd.concat([df_1, df_2], axis=1)
-                    result_df = perform_data_processing(result_df)
-
-                    result_df['StoneID'] = filename_without_suffix
-                    result_df["StoneID"] = result_df["StoneID"].str.split("/")
-                    # Get the last part of each split
-                    result_df["StoneID"] = result_df["StoneID"].str.get(-1)
-
-                    result_df = result_df[[
-                        "certName",
-                        "certNO",
-                        "StoneID",
-                        "displayName",
-                        "Stone",
-                        "Detected_Color",
-                        "Detected_Origin",
-                        "Reformatted_issuedDate",
-                        "Indication",
-                        "oldHeat",
-                        "Mogok",
-                        "Detected_Cut",
-                        "Detected_Shape",
-                        "carat",
-                        "length",
-                        "width",
-                        "height"
-                    ]]
-                    result_df = result_df.rename(columns={
-                        "Detected_Color": "Color",
-                        "Detected_Origin": "Origin",
-                        "Reformatted_issuedDate": "issuedDate",
-                        "Detected_Cut": "Cut",
-                        "Detected_Shape": "Shape"
-                    })
-
-                    # Append the DataFrame to the list
-                    df_list.append(result_df)
+                try:
+                    # Read the image
+                    with zip_data.open(image_file) as file:
+                        img_data = io.BytesIO(file.read())
+                        img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
+                        
+                        # Process the image and perform data processing
+                        # Process the image and perform data processing
+                        df_1 = extract_gemstone_info(img)
+                        df_2 = extract_origin_info(img)
+                        result_df = pd.concat([df_1, df_2], axis=1)
+                        result_df = perform_data_processing(result_df)
+    
+                        result_df['StoneID'] = filename_without_suffix
+                        result_df["StoneID"] = result_df["StoneID"].str.split("/")
+                        # Get the last part of each split
+                        result_df["StoneID"] = result_df["StoneID"].str.get(-1)
+    
+                        result_df = result_df[[
+                            "certName",
+                            "certNO",
+                            "StoneID",
+                            "displayName",
+                            "Stone",
+                            "Detected_Color",
+                            "Detected_Origin",
+                            "Reformatted_issuedDate",
+                            "Indication",
+                            "oldHeat",
+                            "Mogok",
+                            "Detected_Cut",
+                            "Detected_Shape",
+                            "carat",
+                            "length",
+                            "width",
+                            "height"
+                        ]]
+                        result_df = result_df.rename(columns={
+                            "Detected_Color": "Color",
+                            "Detected_Origin": "Origin",
+                            "Reformatted_issuedDate": "issuedDate",
+                            "Detected_Cut": "Cut",
+                            "Detected_Shape": "Shape"
+                        })
+    
+                        # Append the DataFrame to the list
+                        df_list.append(result_df)
+                    except Exception as e:
+                        # Handle errors for this image, you can log or print the error message
+                        st.error(f"Error processing image {image_file}: {str(e)}")
+                        continue  # Skip to the next image
 
         # Concatenate all DataFrames into one large DataFrame
         final_df = pd.concat(df_list, ignore_index=True)
