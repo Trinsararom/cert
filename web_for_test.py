@@ -165,18 +165,17 @@ def detect_origin(origin):
     return origin_without_parentheses.strip()
 
 def reformat_issued_date(issued_date):
-    try:
-        # Remove ordinal suffixes (e.g., "th", "nd", "rd")
-        cleaned_date = re.sub(r'(?<=\d)(st|nd|rd|th)\b', '', issued_date.replace("‘", "").replace("I", "1").replace("S", "5").strip())
 
-        # Parse the cleaned date string
-        parsed_date = datetime.strptime(cleaned_date, '%d %B %Y')
+    # Remove ordinal suffixes (e.g., "th", "nd", "rd")
+    cleaned_date = re.sub(r'(?<=\d)(st|nd|rd|th)\b', '', issued_date.replace("‘", "").replace("I", "1").replace("S", "5").strip())
 
-        # Reformat the date to YYYY-MM-DD
-        reformatted_date = cleaned_date
-        return reformatted_date
-    except ValueError:
-        return ""
+    # Parse the cleaned date string
+    parsed_date = datetime.strptime(cleaned_date, '%d %B %Y')
+
+    # Reformat the date to YYYY-MM-DD
+    reformatted_date = cleaned_date
+    return reformatted_date
+
     
 def detect_mogok(origin):
     return str("(Mogok, Myanmar)" in origin)
@@ -221,7 +220,7 @@ def convert_carat_to_numeric(value_with_unit):
     return numeric_value
 
 def convert_dimension(dimension_str):
-    parts = dimension_str.replace("—_", "").replace("_", "").replace("§", "5").replace(",", ".").replace(" = ", "").split(" x ")
+    parts = dimension_str.replace("—_", "").replace("_", "").replace("§", "5").replace(",", ".").replace("=", "").split(" x ")
     if len(parts) == 3 and parts[-1].endswith(" (mm)"):
         length = (parts[0])
         width = (parts[1])
