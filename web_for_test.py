@@ -161,7 +161,7 @@ def extract_gemstone_info(img):
         df5.columns = ['Weight', 'Dimensions', 'Cut', 'Shape', 'Color', 'Comment']
 
         # Concatenate df and df1 vertically (row-wise)
-        df = pd.concat([df4, df5], ignore_index=True)
+        df = pd.concat([df4, df5], axis = 1)
 
         return df
 
