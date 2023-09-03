@@ -68,8 +68,6 @@ def crop_image(img):
 
     crop4 = crop1[top_crop4:bottom_crop4, left_crop4:right_crop4]
 
-
-
     # Crop the top half of crop2 to create crop3
     top_crop5 = int(crop1.shape[0] // 1.52)
     bottom_crop5 = int(crop1.shape[0] // 1.13)
@@ -319,6 +317,7 @@ def perform_data_processing(result_df):
     result_df = extract_cert_info(result_df, 'No.')
     result_df["carat"] = result_df["Weight"].apply(convert_carat_to_numeric)
     result_df[["length", "width", "height"]] = result_df["Dimensions"].apply(convert_dimension).apply(pd.Series)
+    result_df['Detected_Origin'] = result_df['Detected_Origin'].str.replace(r'\(.*\)', '').str.strip()
     result_df = rename_identification_to_stone(result_df)
 
     result_df = result_df[[
