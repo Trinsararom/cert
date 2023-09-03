@@ -15,11 +15,11 @@ st.set_page_config(
     layout = 'wide',
 )
 
-st.title('Certicatate Scraper')
+st.title('Cert Scraper')
 
 # Initialize the Tesseract OCR
 def initialize_tesseract():
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = = r'/usr/bin/tesseract'
 
 # Initialize Tesseract
 initialize_tesseract()
