@@ -19,7 +19,7 @@ st.title('Cert Scraper')
 
 # Initialize the Tesseract OCR
 def initialize_tesseract():
-    pytesseract.pytesseract.tesseract_cmd = = r'/usr/bin/tesseract'
+    pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
 # Initialize Tesseract
 initialize_tesseract()
