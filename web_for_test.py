@@ -315,7 +315,7 @@ def perform_data_processing(result_df):
     result_df["Mogok"] = result_df["Origin"].apply(detect_mogok)
     result_df["Indication"] = result_df["Comment"].apply(generate_indication)
     result_df["oldHeat"] = result_df.apply(lambda row: detect_old_heat(row["Comment"], row["Indication"]), axis=1)
-    result_df["displayName"] = result_df.apply(lambda row: generate_display_name(row["Detected_Color"], row["Detected_Origin"]), axis=1)
+    result_df["displayName"] = result_df.apply(lambda row: generate_display_name(row["Color"], row['Detected_Color'], row["Detected_Origin"]), axis=1)
     result_df = extract_cert_info(result_df, 'No.')
     result_df["carat"] = result_df["Weight"].apply(convert_carat_to_numeric)
     result_df[["length", "width", "height"]] = result_df["Dimensions"].apply(convert_dimension).apply(pd.Series)
