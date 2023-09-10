@@ -347,7 +347,7 @@ def needs_denoising(image):
     variance = cv2.meanStdDev(image)[1]
 
     # If the variance is below a certain threshold, denoising is needed
-    denoise_threshold = 20.0  # You can adjust this threshold as needed
+    denoise_threshold = 10.0  # You can adjust this threshold as needed
     return variance < denoise_threshold
     
 # Specify the file pattern you want to filter
