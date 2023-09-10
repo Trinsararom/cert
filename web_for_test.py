@@ -237,30 +237,39 @@ def detect_mogok(origin):
     return str("(Mogok, Myanmar)" in origin)
 
 def generate_indication(comment):
-    if comment in ["H", "H(a)", "H(b)", "H(c)"]:
+    if comment in ["H", "H(a)", "H(b)", "H(c)", "(a)","Ha)"]:
         return "Heated"
     else:
         return "Unheated"
     
 def detect_old_heat(comment, indication):
     if indication == "Heated":
-        if comment in ["H", "H(a)", "H(b)", "H(c)"]:
-            return "oldHeat"
-    return ""
+        if "(a)" in comment or "Ha)" in comment:
+            return "H(a)"
+        return comment
+    else :
+        comment = ''
+        return comment
 
-def generate_display_name(color, Color_1, origin):
+def generate_display_name(color, Color_1, origin, indication, comment):
     display_name = ""
 
     if color is not None:
         color = str(color).lower()  # Convert color to lowercase
-        if "*" in color:
-            display_name = "PGB*"
-        elif color == "red":
-            display_name = "GRS"
-        elif color == "pigeonsblood" or "(grs type \"pigeon's blood\")" in color or "(gr type \"pigeon's blood\")" in color:
-            display_name = "PGB"
-        else:
-            display_name = f"GRS({Color_1})"
+        if indication == "Unheated":
+            if "*" in color:
+                display_name = "PGB*"
+            elif color == "pigeonsblood" or "(grs type \"pigeon's blood\")" or "pigeon's blood" in color or "(gr type \"pigeon's blood\")" in color:
+                display_name = "PGB"
+            else:
+                display_name = f"GRS({Color_1})"
+        if indication == "Heated": 
+            if "*" in color:
+                display_name = "PGB*"
+            elif color == "pigeonsblood" or "(grs type \"pigeon's blood\")" or "pigeon's blood" in color or "(gr type \"pigeon's blood\")" in color:
+                display_name = f"GRS(PGB)({comment})"
+            else:
+                display_name = f"GRS({Color_1})({comment})"
     
     if "(mogok, myanmar)" in str(origin).lower():  # Convert origin to lowercase for case-insensitive comparison
         display_name = "MG-" + display_name
@@ -315,11 +324,12 @@ def perform_data_processing(result_df):
     result_df["Mogok"] = result_df["Origin"].apply(detect_mogok)
     result_df["Indication"] = result_df["Comment"].apply(generate_indication)
     result_df["oldHeat"] = result_df.apply(lambda row: detect_old_heat(row["Comment"], row["Indication"]), axis=1)
-    result_df["displayName"] = result_df.apply(lambda row: generate_display_name(row["Color"], row['Detected_Color'], row["Detected_Origin"]), axis=1)
+    result_df["displayName"] = result_df.apply(lambda row: generate_display_name(row["Color"], row['Detected_Color'], row["Detected_Origin"], row['Indication'], row['oldHeat']), axis=1)
     result_df = extract_cert_info(result_df, 'No.')
     result_df["carat"] = result_df["Weight"].apply(convert_carat_to_numeric)
     result_df[["length", "width", "height"]] = result_df["Dimensions"].apply(convert_dimension).apply(pd.Series)
     result_df['Detected_Origin'] = result_df['Detected_Origin'].str.replace(r'\(.*\)', '').str.strip()
+    result_df[['carat', 'length', 'width', 'height']] = result_df[['carat', 'length', 'width', 'height']].replace("$", "5")
     result_df = rename_identification_to_stone(result_df)
 
     result_df = result_df[[
@@ -342,6 +352,7 @@ def perform_data_processing(result_df):
     ]]
     
     return result_df
+
     
 # Specify the folder containing the images
 # folder_path = r'C:\Users\kan43\Downloads\Cert Scraping Test'
@@ -420,7 +431,8 @@ if zip_file is not None:
         # Display the final DataFrame
         st.write(final_df)
 
-        csv_data = final_df.to_csv(index=False).encode('utf-8')
+
+        csv_data = final_df.to_csv(index=False, float_format="%.2f").encode('utf-8')
         st.download_button(
             label="Download CSV",
             data=csv_data,
