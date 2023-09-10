@@ -61,7 +61,7 @@ def crop_image(img):
     crop4_height = int(crop1.shape[0] // 2.4)
 
     # Crop the top half of crop2 to create crop3
-    top_crop4 = int(crop1.shape[0] // 4.3)
+    top_crop4 = int(crop1.shape[0] // 4.6)
     bottom_crop4 = crop4_height
     left_crop4 = 0
     right_crop4 = crop1.shape[1]
