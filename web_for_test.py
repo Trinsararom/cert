@@ -8,6 +8,7 @@ import zipfile
 import io
 import pandas as pd
 import streamlit as st
+import concurrent.futures
 import numpy as np
 
 st.set_page_config(
@@ -340,77 +341,89 @@ def perform_data_processing(result_df):
     ]]
     
     return result_df
-    
-# Specify the folder containing the images
-# folder_path = r'C:\Users\kan43\Downloads\Cert Scraping Test'
 
+def needs_denoising(image):
+    # Calculate the variance of pixel values in the image
+    variance = cv2.meanStdDev(image)[1]
+
+    # If the variance is below a certain threshold, denoising is needed
+    denoise_threshold = 20.0  # You can adjust this threshold as needed
+    return variance < denoise_threshold
+    
 # Specify the file pattern you want to filter
 file_pattern = "-01_GRS"
 
 # Create a Streamlit file uploader for the zip file
 zip_file = st.file_uploader("Upload a ZIP file containing images", type=["zip"])
 
+def process_image(image_file):
+    filename_without_suffix = image_file.split('-')[0]
+    try:
+        # Read the image
+        with zip_data.open(image_file) as file:
+            img_data = io.BytesIO(file.read())
+            img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), 0)
+
+            # Check if the image needs denoising (based on image quality)
+            if needs_denoising(img):
+                img = cv2.fastNlMeansDenoising(img, None, 20, 7, 21)
+
+        # Process the image and perform data processing
+        df_1 = extract_gemstone_info(img)
+        df_2 = extract_origin_info(img)
+
+        result_df = pd.concat([df_1, df_2], axis=1)
+        result_df = perform_data_processing(result_df)
+        result_df['StoneID'] = filename_without_suffix
+
+        result_df = result_df[[
+            "certName",
+            "certNO",
+            "StoneID",
+            "displayName",
+            "Stone",
+            "Detected_Color",
+            "Detected_Origin",
+            "Reformatted_issuedDate",
+            "Indication",
+            "oldHeat",
+            "Mogok",
+            "Detected_Cut",
+            "Detected_Shape",
+            "carat",
+            "length",
+            "width",
+            "height"
+        ]]
+        result_df = result_df.rename(columns={
+            "Detected_Color": "Color",
+            "Detected_Origin": "Origin",
+            "Reformatted_issuedDate": "issuedDate",
+            "Detected_Cut": "Cut",
+            "Detected_Shape": "Shape"
+        })
+
+        return result_df
+    except Exception as e:
+        # Handle errors for this image, you can log or print the error message
+        st.error(f"Error processing image {image_file}: {str(e)}")
+        return None
+
 if zip_file is not None:
     # Extract the uploaded ZIP file
     with zipfile.ZipFile(zip_file) as zip_data:
         df_list = []
 
-        for image_file in zip_data.namelist():
-            if file_pattern in image_file:
-                filename_without_suffix = image_file.split('-')[0]
-                try:
-                    # Read the image
-                    with zip_data.open(image_file) as file:
-                        img_data = io.BytesIO(file.read())
-                        img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), 0)
-                        noiseless_image_bw = cv2.fastNlMeansDenoising(img, None, 20, 7, 21)
-                        img = noiseless_image_bw
-                        
-                        # Process the image and perform data processing
-                        # Process the image and perform data processing
-                        df_1 = extract_gemstone_info(img)
-                        df_2 = extract_origin_info(img)
-                        result_df = pd.concat([df_1, df_2], axis=1)
-                        result_df = perform_data_processing(result_df)
-    
-                        result_df['StoneID'] = filename_without_suffix
-                        result_df["StoneID"] = result_df["StoneID"].str.split("/")
-                        # Get the last part of each split
-                        result_df["StoneID"] = result_df["StoneID"].str.get(-1)
-    
-                        result_df = result_df[[
-                            "certName",
-                            "certNO",
-                            "StoneID",
-                            "displayName",
-                            "Stone",
-                            "Detected_Color",
-                            "Detected_Origin",
-                            "Reformatted_issuedDate",
-                            "Indication",
-                            "oldHeat",
-                            "Mogok",
-                            "Detected_Cut",
-                            "Detected_Shape",
-                            "carat",
-                            "length",
-                            "width",
-                            "height"
-                        ]]
-                        result_df = result_df.rename(columns={
-                            "Detected_Color": "Color",
-                            "Detected_Origin": "Origin",
-                            "Reformatted_issuedDate": "issuedDate",
-                            "Detected_Cut": "Cut",
-                            "Detected_Shape": "Shape"
-                        })
-    
-                        # Append the DataFrame to the list
-                        df_list.append(result_df)
-                except Exception as e:
-                    # Handle errors for this image, you can log or print the error message
-                    st.error(f"Error processing image {image_file}: {str(e)}")
-                    pass  # Skip to the next image
+        # Create a ThreadPoolExecutor for parallel processing
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Process images in parallel
+            futures = [executor.submit(process_image, image_file) for image_file in zip_data.namelist() if file_pattern in image_file]
+
+            # Collect the results
+            for future in concurrent.futures.as_completed(futures):
+                result_df = future.result()
+                if result_df is not None:
+                    df_list.append(result_df)
 
         # Concatenate all DataFrames into one large DataFrame
         final_df = pd.concat(df_list, ignore_index=True)
