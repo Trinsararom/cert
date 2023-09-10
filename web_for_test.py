@@ -351,7 +351,7 @@ def perform_data_processing(result_df):
     "length",
     "width",
     "height"
-    ]]
+    ,'Date']]
     
     return result_df
 
@@ -410,7 +410,7 @@ if zip_file is not None:
                             "carat",
                             "length",
                             "width",
-                            "height"
+                            "height",'Date'
                         ]]
                         result_df = result_df.rename(columns={
                             "Detected_Color": "Color",
