@@ -185,7 +185,7 @@ def detect_color(text):
     text = str(text).lower()  # Convert the text to lowercase
     if "pigeonsblood" in text:
         return "PigeonsBlood"
-    elif "royal blue" in text or "\"royal blue\"" in text:
+    elif "royal blue" in text or "(grs type \"royal blue\")" in text or "(gr type \"royal blue\")" in text:
         return "RoyalBlue"
     elif "*" in text:
         return "PigeonsBlood"
