@@ -407,7 +407,7 @@ if zip_file is not None:
                             "StoneID",
                             "displayName",
                             "Stone",
-                            "Detected_Color","Color",
+                            "Detected_Color",
                             "Detected_Origin",
                             "Reformatted_issuedDate",
                             "Indication",
