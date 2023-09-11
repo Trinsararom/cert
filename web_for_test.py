@@ -271,16 +271,16 @@ def generate_display_name(color, Color_1, origin, indication, comment):
         color = str(color).lower()  # Convert color to lowercase
         if indication == "Unheated":
             if "*" in color:
-                display_name = "PGB*"
+                display_name = "GRS(PGB*)"
             elif color == "pigeonsblood" or "(grs type \"pigeon's blood\")" in color or "pigeon's blood" in color or "(gr type \"pigeon's blood\")" in color:
-                display_name = "PGB"
+                display_name = "GRS(PGB)"
             elif color == "royal blue" or "royalblue" in color or "royal blue" in color or "(grs type \"royal blue\")" in color or "(gr type \"royal blue\")" in color:
-                display_name = "RYB"
+                display_name = "GRS(RYB)"
             else:
                 display_name = f"GRS({Color_1})"
         if indication == "Heated": 
             if "*" in color:
-                display_name = "PGB*"
+                display_name = "GRS(PGB*)"
             elif color == "pigeonsblood" or "(grs type \"pigeon's blood\")" in color or "pigeon's blood" in color or "(gr type \"pigeon's blood\")" in color:
                 display_name = f"GRS(PGB)({comment})"
             elif color == "royal blue" or "royalblue" in color or "royal blue" in color or "(grs type \"royal blue\")" in color or "(gr type \"royal blue\")" in color:
