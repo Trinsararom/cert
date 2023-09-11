@@ -185,6 +185,8 @@ def detect_color(text):
     text = str(text).lower()  # Convert the text to lowercase
     if "pigeonsblood" in text:
         return "PigeonsBlood"
+    elif "royalblue" in text or "royal blue" in text:
+        return "RoyalBlue"
     elif "*" in text:
         return "PigeonsBlood"
     elif "(grs type \"pigeon's blood\")"  in text:
@@ -239,15 +241,19 @@ def detect_mogok(origin):
     return str("(Mogok, Myanmar)" in origin)
 
 def generate_indication(comment):
-    if comment in ["H", "H(a)", "H(b)", "H(c)", "(a)","Ha)"]:
+    if comment in ["H", "H(a)", "H(b)", "H(c)", "(a)","Ha)", "H(a", "(b)", "Hb)", "H(b, "(c)", "Hc)", "H(c"]:
         return "Heated"
     else:
         return "Unheated"
     
 def detect_old_heat(comment, indication):
     if indication == "Heated":
-        if "(a)" in comment or "Ha)" in comment:
+        if "(a)" in comment or "Ha)" in comment or "H(a" in comment:
             return "H(a)"
+        elif "(b)" in comment or "Hb)" in comment or "H(b" in comment:
+            return "H(b)"
+        elif "(c)" in comment or "Hc)" in comment or "H(c" in comment:
+            return "H(c)"
         return comment
     else :
         comment = ''
@@ -263,6 +269,8 @@ def generate_display_name(color, Color_1, origin, indication, comment):
                 display_name = "PGB*"
             elif color == "pigeonsblood" or "(grs type \"pigeon's blood\")" or "pigeon's blood" in color or "(gr type \"pigeon's blood\")" in color:
                 display_name = "PGB"
+            elif "royalblue" in color or "royal blue" in color:
+                display_name = "RYB"
             else:
                 display_name = f"GRS({Color_1})"
         if indication == "Heated": 
@@ -270,6 +278,8 @@ def generate_display_name(color, Color_1, origin, indication, comment):
                 display_name = "PGB*"
             elif color == "pigeonsblood" or "(grs type \"pigeon's blood\")" or "pigeon's blood" in color or "(gr type \"pigeon's blood\")" in color:
                 display_name = f"GRS(PGB)({comment})"
+            elif "royalblue" in color or "royal blue" in color:
+                display_name = f"RYB({comment})"
             else:
                 display_name = f"GRS({Color_1})({comment})"
     
