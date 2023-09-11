@@ -241,19 +241,17 @@ def detect_mogok(origin):
     return str("(Mogok, Myanmar)" in origin)
 
 def generate_indication(comment):
-    if comment in ["H", "H(a)", "H(b)", "H(c)", "(a)","Ha)", "H(a", "(b)", "Hb)", "H(b, "(c)", "Hc)", "H(c"]:
+    if comment in ["H", "H(a)", "H(b)", "H(c)", "(a)", "Ha)", "H(a)", "(b)", "Hb)", "H(b)", "(c)", "Hc)", "H(c)"]:
         return "Heated"
     else:
         return "Unheated"
+
     
 def detect_old_heat(comment, indication):
     if indication == "Heated":
-        if "(a)" in comment or "Ha)" in comment or "H(a" in comment:
-            return "H(a)"
-        elif "(b)" in comment or "Hb)" in comment or "H(b" in comment:
-            return "H(b)"
-        elif "(c)" in comment or "Hc)" in comment or "H(c" in comment:
-            return "H(c)"
+        comment = comment.replace("(a)", "H(a)").replace("(b)", "H(b)").replace("(c)", "H(c)")
+        comment = comment.replace("Ha)", "H(a)").replace("Hb)", "H(b)").replace("Hc)", "H(c)")
+        comment = comment.replace("H(a", "H(a)").replace("H(b", "H(b)").replace("H(c", "H(c)")
         return comment
     else :
         comment = ''
