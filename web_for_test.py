@@ -102,7 +102,7 @@ def extract_gemstone_info(img):
         extracted_info = {}
 
         # Keywords in lowercase
-        keywords = ["no. grs", "date", "object", "identification", "weight", "dimensions", "cut", "shape", "color", "comment"]
+        keywords = ["no", "date", "object", "identification", "weight", "dimensions", "cut", "shape", "color", "comment"]
 
         # Iterate through the lines to find relevant information
         for line in lines:
@@ -119,7 +119,7 @@ def extract_gemstone_info(img):
         data_dict = {}
         for keyword, col_name in zip(keywords, custom_column_names):
             value = extracted_info.get(keyword, "")
-            if keyword == "no. grs":
+            if keyword == "no grs":
                 value = lines[5].strip() if keyword not in extracted_info else extracted_info[keyword]
             elif keyword == "date":
                 value = lines[6].strip() if keyword not in extracted_info else extracted_info[keyword]
