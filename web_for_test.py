@@ -175,13 +175,14 @@ def extract_origin_info(img):
 
     # Split the extracted text into lines and filter out empty lines
     lines = [line for line in extracted_texts.splitlines() if line.strip()]
+    lines = [line for line in lines if "Special comment see appendix" not in line]
 
         # Check if lines is empty, and return an empty DataFrame if it is
     if not lines:
         return pd.DataFrame({'Origin': [""]})
     # Create a DataFrame
     df = pd.DataFrame({'Origin': [lines[-1]]})
-    
+
     return df
 
 
@@ -193,6 +194,8 @@ def detect_color(text):
         return "RoyalBlue"
     elif "*" in text:
         return "PigeonsBlood"
+    elif "vibrant" in text or "(grs type \"vibrant\")" in text or "(gr type \"vibrant\")" in text :
+        return "VibrantVividPink"
     elif "(grs type \"pigeon's blood\")"  in text:
         return "PigeonsBlood"
     elif "(gr type \"pigeon's blood\")" in text:
@@ -203,10 +206,11 @@ def detect_color(text):
         return text
     
 def detect_cut(cut):
-    if cut != "Cabochon":
-        return "cut"
+    text = str(cut).lower()
+    if "cabochon" in text:
+        return text
     else:
-        return cut
+        return "cut"
     
 def detect_shape(shape):
     valid_shapes = [
@@ -263,7 +267,7 @@ def detect_old_heat(comment, indication):
     else :
         comment = ''
         return comment
-
+    
 def generate_display_name(color, Color_1, origin, indication, comment):
     display_name = ""
 
