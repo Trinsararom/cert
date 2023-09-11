@@ -318,22 +318,26 @@ def convert_dimension(dimension_str):
         height = (parts[2][:-5])  # Remove " (mm)" from the last part
         return length, width, height
     return None, None, None
-
+    
 def rename_identification_to_stone(dataframe):
     # Rename "Identification" to "Stone"
     dataframe.rename(columns={"Identification": "Stone"}, inplace=True)
-
     # Remove unwanted words and trim spaces in the "Stone" column
     dataframe["Stone"] = dataframe["Stone"].str.replace("‘", "").str.strip()
 
     # Define a list of gemstone names to detect
-    gemstone_names = ["Ruby", "Sapphire", "Emerald"]  # Add more gemstone names as needed
+    gemstone_names = ["Ruby", "Emerald", "Pink Sapphire", "Purple Sapphire", "Sapphire", "Spinel", "Tsavorite", "Blue Sapphire", "Fancy Sapphire", "Peridot", "Padparadscha"]  # Add more gemstone names as needed
 
-    # Detect and update the "Stone" column with the gemstone names
-    dataframe["Stone"] = dataframe["Stone"].apply(lambda x: next((gem for gem in gemstone_names if gem in x), x))
+    # Function to remove "Natural" or "Star" from the stone name
+    def remove_prefix(name):
+        for prefix in ["Natural", "Star"]:
+            name = name.replace(prefix, "").strip()
+        return name
+
+    # Detect and update the "Stone" column with the gemstone names (ignoring "Natural" or "Star")
+    dataframe["Stone"] = dataframe["Stone"].apply(lambda x: next((gem for gem in gemstone_names if gem in remove_prefix(x)), x))
 
     return dataframe
-
 # Define the function to perform all data processing steps
 def perform_data_processing(result_df):
     
