@@ -267,7 +267,7 @@ def generate_display_name(color, Color_1, origin, indication, comment):
                 display_name = "PGB*"
             elif color == "pigeonsblood" or "(grs type \"pigeon's blood\")" or "pigeon's blood" in color or "(gr type \"pigeon's blood\")" in color:
                 display_name = "PGB"
-            elif color == "royalblue" or "royalblue" in color or "royal blue" in color:
+            elif color == "royal blue" or "royalblue" in color or "royal blue" in color:
                 display_name = "RYB"
             else:
                 display_name = f"GRS({Color_1})"
@@ -276,7 +276,7 @@ def generate_display_name(color, Color_1, origin, indication, comment):
                 display_name = "PGB*"
             elif color == "pigeonsblood" or "(grs type \"pigeon's blood\")" or "pigeon's blood" in color or "(gr type \"pigeon's blood\")" in color:
                 display_name = f"GRS(PGB)({comment})"
-            elif color == "royalblue" or "royalblue" in color or "royal blue" in color:
+            elif color == "royal blue" or "royalblue" in color or "royal blue" in color:
                 display_name = f"RYB({comment})"
             else:
                 display_name = f"GRS({Color_1})({comment})"
