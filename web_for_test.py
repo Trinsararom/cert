@@ -24,6 +24,7 @@ def initialize_tesseract():
 # Initialize Tesseract
 initialize_tesseract()
 
+
 def crop_image(img):
 
     
@@ -71,7 +72,7 @@ def crop_image(img):
 
 
     # Crop the top half of crop2 to create crop3
-    top_crop5 = int(crop1.shape[0] // 1.52)
+    top_crop5 = int(crop1.shape[0] // 1.6)
     bottom_crop5 = int(crop1.shape[0] // 1.13)
     left_crop5 = int(crop1.shape[1] // 19.2444)
     right_crop5 = crop1.shape[1]
@@ -175,6 +176,9 @@ def extract_origin_info(img):
     # Split the extracted text into lines and filter out empty lines
     lines = [line for line in extracted_texts.splitlines() if line.strip()]
 
+        # Check if lines is empty, and return an empty DataFrame if it is
+    if not lines:
+        return pd.DataFrame({'Origin': [""]})
     # Create a DataFrame
     df = pd.DataFrame({'Origin': [lines[-1]]})
     
@@ -249,9 +253,12 @@ def generate_indication(comment):
     
 def detect_old_heat(comment, indication):
     if indication == "Heated":
-        comment = comment.replace("(a)", "H(a)").replace("(b)", "H(b)").replace("(c)", "H(c)")
-        comment = comment.replace("Ha)", "H(a)").replace("Hb)", "H(b)").replace("Hc)", "H(c)")
-        comment = comment.replace("H(a", "H(a)").replace("H(b", "H(b)").replace("H(c", "H(c)")
+        if "(a)" in comment or "Ha)" in comment or "H(a" in comment:
+            return "H(a)"
+        elif "(b)" in comment or "Hb)" in comment or "H(b" in comment:
+            return "H(b)"
+        elif "(c)" in comment or "Hc)" in comment or "H(c" in comment:
+            return "H(c)"
         return comment
     else :
         comment = ''
@@ -295,7 +302,7 @@ def extract_cert_info(df,certName):
     return df
 
 def convert_carat_to_numeric(value_with_unit):
-    value_without_unit = value_with_unit.replace(" ct", "").replace(" et", "").replace(" ot", "")
+    value_without_unit = value_with_unit.replace(" ct", "").replace(" et", "").replace(" ot", "").replace("ct", "")
     numeric_value = (value_without_unit)
     return numeric_value
 
