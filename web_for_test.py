@@ -347,7 +347,7 @@ def perform_data_processing(result_df):
     "certNO",
     "displayName",
     "Stone",
-    "Detected_Color",
+    "Detected_Color","Color",
     "Detected_Origin",
     "Reformatted_issuedDate",
     "Indication",
@@ -407,7 +407,7 @@ if zip_file is not None:
                             "StoneID",
                             "displayName",
                             "Stone",
-                            "Detected_Color",
+                            "Detected_Color","Color",
                             "Detected_Origin",
                             "Reformatted_issuedDate",
                             "Indication",
@@ -421,7 +421,7 @@ if zip_file is not None:
                             "height"
                         ]]
                         result_df = result_df.rename(columns={
-                            "Detected_Color": "Color",
+                            #"Detected_Color": "Color",
                             "Detected_Origin": "Origin",
                             "Reformatted_issuedDate": "issuedDate",
                             "Detected_Cut": "Cut",
