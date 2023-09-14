@@ -356,7 +356,7 @@ def perform_data_processing(result_df):
     result_df["carat"] = result_df["Weight"].apply(convert_carat_to_numeric)
     result_df[["length", "width", "height"]] = result_df["Dimensions"].apply(convert_dimension).apply(pd.Series)
     result_df['Detected_Origin'] = result_df['Detected_Origin'].str.replace(r'\(.*\)', '').str.strip()
-    result_df[['carat', 'length', 'width', 'height']] = result_df[['carat', 'length', 'width', 'height']].replace("$", "5").replace("|", "1")
+    result_df[['carat', 'length', 'width', 'height']] = result_df[['carat', 'length', 'width', 'height']].replace("$", "5").replace("| ", "1")
     result_df = rename_identification_to_stone(result_df)
 
     result_df = result_df[[
