@@ -207,11 +207,13 @@ def detect_color(text):
     
 def detect_cut(cut):
     text = str(cut).lower()
-    if "cabochon" in text:
-        return text
+    if "sugar loaf" in text :
+        return "sugar loaf"
+    elif "cabochon" in text:
+        return "cabochon"
     else:
         return "cut"
-    
+        
 def detect_shape(shape):
     valid_shapes = [
         "cushion", "heart", "marquise", "octagonal", "oval",
