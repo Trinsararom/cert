@@ -340,6 +340,10 @@ def rename_identification_to_stone(dataframe):
     dataframe["Stone"] = dataframe["Stone"].apply(lambda x: next((gem for gem in gemstone_names if gem in remove_prefix(x)), x))
 
     return dataframe
+
+def detect_vibrant(Vibrant):
+    return str("(Vibrant)" in Vibrant)
+    
 # Define the function to perform all data processing steps
 def perform_data_processing(result_df):
     
@@ -358,6 +362,7 @@ def perform_data_processing(result_df):
     result_df['Detected_Origin'] = result_df['Detected_Origin'].str.replace(r'\(.*\)', '').str.strip()
     result_df[['carat', 'length', 'width', 'height']] = result_df[['carat', 'length', 'width', 'height']].replace("$", "5").replace("| ", "1")
     result_df = rename_identification_to_stone(result_df)
+    result_df['Vibrant'] = result_df["Detected_Color"].apply(detect_vibrant)
 
     result_df = result_df[[
     "certName",
@@ -370,6 +375,7 @@ def perform_data_processing(result_df):
     "Indication",
     "oldHeat",
     "Mogok",
+    "Vibrant",
     "Detected_Cut",
     "Detected_Shape",
     "carat",
@@ -407,7 +413,6 @@ if zip_file is not None:
                         img = noiseless_image_bw
                         
                         # Process the image and perform data processing
-                        # Process the image and perform data processing
                         df_1 = extract_gemstone_info(img)
                         df_2 = extract_origin_info(img)
                         result_df = pd.concat([df_1, df_2], axis=1)
@@ -430,6 +435,7 @@ if zip_file is not None:
                             "Indication",
                             "oldHeat",
                             "Mogok",
+                            "Vibrant",
                             "Detected_Cut",
                             "Detected_Shape",
                             "carat",
