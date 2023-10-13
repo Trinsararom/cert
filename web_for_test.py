@@ -202,6 +202,8 @@ def detect_color(text):
         return "PigeonsBlood"
     elif "pigeon's blood" in text:
         return "PigeonsBlood"
+    elif "pigeons blood" in text :
+        return "PigeonsBlood"
     else:
         return text
     
