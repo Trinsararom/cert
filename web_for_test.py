@@ -262,11 +262,11 @@ def generate_indication(comment):
 def detect_old_heat(comment, indication):
     if indication == "Heated":
         if "(a)" in comment or "Ha)" in comment or "H(a" in comment:
-            return "H(a)"
+            return "a"
         elif "(b)" in comment or "Hb)" in comment or "H(b" in comment:
-            return "H(b)"
+            return "b"
         elif "(c)" in comment or "Hc)" in comment or "H(c" in comment:
-            return "H(c)"
+            return "c"
         return comment
     else :
         comment = ''
