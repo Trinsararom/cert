@@ -262,11 +262,11 @@ def generate_indication(comment):
 def detect_old_heat(comment, indication):
     if indication == "Heated":
         if "(a)" in comment or "Ha)" in comment or "H(a" in comment:
-            return "a"
+            return "H(a)"
         elif "(b)" in comment or "Hb)" in comment or "H(b" in comment:
-            return "b"
+            return "H(b)"
         elif "(c)" in comment or "Hc)" in comment or "H(c" in comment:
-            return "c"
+            return "H(c)"
         return comment
     else :
         comment = ''
@@ -287,6 +287,12 @@ def generate_display_name(color, Color_1, origin, indication, comment):
             else:
                 display_name = f"GRS({Color_1})"
         if indication == "Heated": 
+            if "(" in comment and ")" in comment:
+                comment_match = re.search(r'\(([^)]+)\)', comment)
+                if comment_match:
+                    comment = comment_match.group(1)
+            else:
+                comment = comment
             if "*" in color:
                 display_name = "GRS(PGB*)"
             elif color == "pigeonsblood" or "(grs type \"pigeon's blood\")" in color or "pigeon's blood" in color or "(gr type \"pigeon's blood\")" in color:
