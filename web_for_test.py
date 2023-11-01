@@ -350,7 +350,8 @@ def rename_identification_to_stone(dataframe):
     return dataframe
 
 def detect_vibrant(Vibrant):
-    return str("(Vibrant)" in Vibrant)
+    Vibrant = str(Vibrant).lower() 
+    return str("vibrant" in Vibrant)
     
 # Define the function to perform all data processing steps
 def perform_data_processing(result_df):
