@@ -352,11 +352,31 @@ def rename_identification_to_stone(dataframe):
 def detect_vibrant(Vibrant):
     Vibrant = str(Vibrant).lower() 
     return str("vibrant" in Vibrant)
+
+def create_vibrant(row):
+    def convert_color(color):
+        if 'Vividred' in color:
+            return 'VividRed'
+        elif 'Vividpink' in color:
+            return 'VividPink'
+        return color
+    
+    if row['Vibrant'] == 'True' and row['Indication'] == 'Heated':
+        modified_display_name = row['displayName'].replace('(H)','')
+        modified_color = row['Color'].replace(' ', '')
+        return f"{modified_display_name}({convert_color(modified_color)})(H)"
+    elif row['Vibrant'] == 'True':
+        modified_color = row['Color'].replace(' ', '')
+        return f"{row['displayName']}({convert_color(modified_color)})"
+    else:
+        return row['displayName']
     
 # Define the function to perform all data processing steps
 def perform_data_processing(result_df):
     
     result_df["Detected_Color"] = result_df["Color"].apply(detect_color)
+    result_df['Vibrant'] = result_df["Detected_Color"].apply(detect_vibrant)
+    result_df["displayName"] = result_df.apply(create_vibrant, axis=1)
     result_df["Detected_Cut"] = result_df["Cut"].apply(detect_cut)
     result_df["Detected_Shape"] = result_df["Shape"].apply(detect_shape)
     result_df["Detected_Origin"] = result_df["Origin"].apply(detect_origin)
@@ -371,7 +391,6 @@ def perform_data_processing(result_df):
     result_df['Detected_Origin'] = result_df['Detected_Origin'].str.replace(r'\(.*\)', '').str.strip()
     result_df[['carat', 'length', 'width', 'height']] = result_df[['carat', 'length', 'width', 'height']].replace("$", "5").replace("| ", "1")
     result_df = rename_identification_to_stone(result_df)
-    result_df['Vibrant'] = result_df["Detected_Color"].apply(detect_vibrant)
 
     result_df = result_df[[
     "certName",
