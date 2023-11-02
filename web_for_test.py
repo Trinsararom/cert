@@ -370,6 +370,37 @@ def create_vibrant(row):
         return f"{row['displayName']}({convert_color(modified_color)})"
     else:
         return row['displayName']
+
+def add_displayname1_column(Detected_Origin, Stone,displayName):
+    # Define a mapping of location names to their alternatives
+    location_mapping = {
+        "Madagascar": "Mada",
+        "Sri Lanka": "Sri",
+        "Tanzania": "Tan",
+        "Tajikistan": "Taji",
+        "East Africa": "EastAfica",
+        "No origin": "(0)"
+    }
+
+    # Create a DataFrame with Detected_Origin and Stone as columns
+    data = pd.DataFrame({
+        "Detected_Origin": Detected_Origin,
+        "Stone": Stone,
+        'displayName' : displayName
+    })
+
+    # Define a function to apply conditions and generate "displayname1"
+    def generate_displayname(row):
+        if row["Stone"] == "Ruby" and row['Detected_Origin'] not in ['Mozambique', 'Burma']:
+            return f"{row['displayName']}({location_mapping.get(row['Detected_Origin'], row['Detected_Origin'])})"
+        else:
+            return row['displayName']
+
+
+    # Apply the function to generate the "displayname1" column
+    data["displayName"] = data.apply(generate_displayname, axis=1)
+
+    return data["displayName"]
     
 # Define the function to perform all data processing steps
 def perform_data_processing(result_df):
@@ -391,6 +422,7 @@ def perform_data_processing(result_df):
     result_df['Detected_Origin'] = result_df['Detected_Origin'].str.replace(r'\(.*\)', '').str.strip()
     result_df[['carat', 'length', 'width', 'height']] = result_df[['carat', 'length', 'width', 'height']].replace("$", "5").replace("| ", "1")
     result_df = rename_identification_to_stone(result_df)
+    result_df["displayName"] = add_displayname1_column(result_df["Detected_Origin"], result_df["Stone"], result_df["displayName"])
 
     result_df = result_df[[
     "certName",
